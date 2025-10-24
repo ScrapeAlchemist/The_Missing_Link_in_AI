@@ -1,18 +1,18 @@
 /**
- * Main Workflow: Smart MCP-Powered Research Agent
- * Uses Bright Data MCP tools + OpenAI via LangChain to research and synthesize results
+ * Main Workflow: MCP-Powered Research Agent
+ * Uses Bright Data MCP tools + LangChain to research and synthesize results
  */
 
 import 'dotenv/config';
-import { ChatOpenAI } from '@langchain/openai';
+import { ChatAnthropic } from '@langchain/anthropic';
 import { MultiServerMCPClient } from '@langchain/mcp-adapters';
 import { fileURLToPath } from 'url';
 
 // Configuration constants
 const CONFIG = {
   apiKey: process.env.BRIGHTDATA_API_KEY,
-  openaiKey: process.env.OPENAI_API_KEY,
-  openaiModel: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+  anthropicKey: process.env.ANTHROPIC_API_KEY,
+  anthropicModel: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5',
 };
 
 // Content processing constants
@@ -83,10 +83,9 @@ async function runWorkflow(query, options = {}) {
   console.log(`Query: "${query}"`);
   console.log(`Max results to analyze: ${maxResults}`);
 
-  // Display OpenAI status
-  if (!CONFIG.openaiKey) {
-    console.log('\nNote: OPENAI_API_KEY not set - using heuristic summarization');
-    console.log('For higher quality synthesis, add OPENAI_API_KEY to .env\n');
+  if (!CONFIG.anthropicKey) {
+    console.log('\nNote: ANTHROPIC_API_KEY not set - using heuristic summarization');
+    console.log('Add ANTHROPIC_API_KEY to .env for LLM-powered synthesis\n');
   }
 
   const client = new MultiServerMCPClient({
@@ -116,8 +115,8 @@ async function runWorkflow(query, options = {}) {
   console.log(`\n${'='.repeat(60)}`);
   console.log('STEP 4: Selecting URLs with Domain Diversity');
   console.log('='.repeat(60));
-  const llm = CONFIG.openaiKey
-    ? new ChatOpenAI({ apiKey: CONFIG.openaiKey, model: CONFIG.openaiModel, temperature: 0 })
+  const llm = CONFIG.anthropicKey
+    ? new ChatAnthropic({ apiKey: CONFIG.anthropicKey, model: CONFIG.anthropicModel, temperature: 0 })
     : null;
 
   let urls = [];
@@ -131,7 +130,7 @@ async function runWorkflow(query, options = {}) {
 
     console.log(`Selected ${urls.length} URLs from ${domainCount} domains`);
   } catch (e) {
-    console.error(`Could not parse search results: ${e.message}`);
+    console.error(`Failed to parse search results: ${e.message}`);
   }
 
   if (urls.length === 0) {
@@ -159,7 +158,6 @@ async function runWorkflow(query, options = {}) {
     }
   }
 
-  // Warn if most scrapes failed
   if (scrapedContent.length < urls.length * 0.3) {
     console.log(`\nWarning: Only ${scrapedContent.length}/${urls.length} pages scraped successfully`);
     console.log('Results may be incomplete\n');
@@ -180,7 +178,7 @@ async function runWorkflow(query, options = {}) {
   let result;
   if (llm) {
     const synthesisResponse = await llm.invoke([
-      { role: 'system', content: 'You are an intelligent research assistant. Analyze the provided web sources and create a comprehensive research report on the user\'s query. Include key findings, important details, and cite sources with URLs.' },
+      { role: 'system', content: 'Analyze web sources and create a comprehensive research report. Include key findings and cite sources with URLs.' },
       { role: 'user', content: `Query: ${query}\n\nSources:\n${combinedContent}\n\nCreate a comprehensive research report with citations.` }
     ]);
     result = synthesisResponse.content;
@@ -240,12 +238,10 @@ if (isMain) {
 
 export { runWorkflow };
 
-// -------------------------
 // Heuristic Fallback Logic
-// -------------------------
 
 /**
- * Extract top keywords from text, filtering common stopwords
+ * Extract top keywords from text, filtering stopwords
  */
 function topKeywords(text, n = 15) {
   const counts = new Map();
@@ -258,7 +254,7 @@ function topKeywords(text, n = 15) {
 }
 
 /**
- * Extract first few sentences from markdown content
+ * Extract first sentences from markdown content
  */
 function firstSentences(md, max = 3) {
   const text = md.replace(/[#>*`_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -281,8 +277,8 @@ function extractHeadings(md, max = 5) {
 }
 
 /**
- * Generate a heuristic summary when LLM is not available
- * Uses headings, first sentences, and keyword extraction for basic summarization
+ * Generate heuristic summary when LLM is not available
+ * Uses headings, first sentences, and keyword extraction
  */
 function heuristicSummarize(query, scrapedContent) {
   const pieces = scrapedContent.map((s, i) => ({
@@ -319,7 +315,7 @@ function heuristicSummarize(query, scrapedContent) {
   }
 
   lines.push('');
-  lines.push('(Rendered without an LLM. Set OPENAI_API_KEY for higher-quality synthesis.)');
+  lines.push('(Rendered without an LLM. Set ANTHROPIC_API_KEY for higher-quality synthesis.)');
 
   return lines.join('\n');
 }

@@ -36,8 +36,8 @@ All while bypassing blocks, CAPTCHAs, and anti-bot measures automatically.
 ### Installation
 
 ```bash
-git clone https://github.com/brightdata/brightdata-workshop-calhack.git
-cd brightdata-workshop-calhack
+git clone https://github.com/ScrapeAlchemist/The_Missing_Link_in_AI.git
+cd The_Missing_Link_in_AI
 npm install
 ```
 
@@ -46,7 +46,7 @@ npm install
 1. Get API Key from https://brightdata.com/cp/settings
    - Navigate to "API tokens" → Generate new token
 
-2. (Optional) Get OpenAI API Key from https://platform.openai.com/api-keys
+2. (Optional) Get Anthropic API Key from https://console.anthropic.com/settings/keys
    - Recommended for higher-quality synthesis (heuristic fallback used if omitted)
    
 3. Set up environment:
@@ -62,9 +62,9 @@ BRIGHTDATA_API_KEY=your_api_key_here
 
 Optional:
 ```bash
-OPENAI_API_KEY=your_openai_key_here   # Enables LLM synthesis (recommended)
-SERP_ZONE=your_serp_zone_name       # Create a SERP API zone in Bright Data
-UNLOCKER_ZONE=your_unlocker_zone    # Create a Web Unlocker zone in Bright Data
+ANTHROPIC_API_KEY=your_anthropic_key_here   # Enables LLM synthesis (recommended)
+SERP_ZONE=your_serp_zone_name             # Create a SERP API zone in Bright Data
+UNLOCKER_ZONE=your_unlocker_zone          # Create a Web Unlocker zone in Bright Data
 ```
 
 4. Verify your setup:
@@ -109,14 +109,14 @@ The main workflow uses Bright Data MCP tools:
 - Search relevant sources with domain diversity
 - Scrape selected pages as clean markdown
 - Synthesize a research report with citations
-  - Uses OpenAI if configured
+  - Uses Claude (Anthropic) if configured
   - Falls back to a heuristic, offline summarizer otherwise
 
 **Alternative Access Methods** (for learning/comparison):
 - `npm run demo:api` - Basic HTTP API approach (requires `SERP_ZONE` + `UNLOCKER_ZONE`)
-- `npm run demo:mcp` - ReAct agent demo (requires `OPENAI_API_KEY`)
+- `npm run demo:mcp` - ReAct agent demo (requires `ANTHROPIC_API_KEY`)
 
-**Note**: Bright Data also provides a [Python SDK](https://github.com/luminati-io/bright-data-sdk-python) for high-level abstractions and type safety in Python applications.
+**Note**: Bright Data also provides a [Python SDK](https://github.com/brightdata/bright-data-sdk-python) for high-level abstractions and type safety in Python applications.
 
 ### Responsible Use
 
@@ -145,8 +145,8 @@ The main workflow performs a simple, reliable pipeline:
 2. Run a search and select URLs with domain diversity
 3. Scrape each page into clean markdown
 4. Synthesize a report with citations
-   - With OpenAI: higher-quality analysis and synthesis
-   - Without OpenAI: heuristic summary highlighting headings, first sentences, keywords, and sources
+   - With Claude: higher-quality analysis and synthesis
+   - Without Claude: heuristic summary highlighting headings, first sentences, keywords, and sources
 
 ```javascript
 import { runWorkflow } from './src/main_workflow.js';
@@ -201,10 +201,10 @@ Give a star if this workshop helped you!
 
 ## No LLM? Offline Mode
 
-- OpenAI is optional for the main workflow. If `OPENAI_API_KEY` is not set, the workflow still runs and produces a heuristic summary with citations (headings, first sentences, keywords, and sources).
-- For higher quality synthesis, set `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`, default `gpt-4o-mini`).
+- Claude is optional for the main workflow. If `ANTHROPIC_API_KEY` is not set, the workflow still runs and produces a heuristic summary with citations (headings, first sentences, keywords, and sources).
+- For higher quality synthesis, set `ANTHROPIC_API_KEY` (and optionally `ANTHROPIC_MODEL`, default `claude-sonnet-4-5`).
 
 ## Demo Requirements
 
 - `npm run demo:api` requires `SERP_ZONE` and `UNLOCKER_ZONE` in `.env` (Bright Data zones).
-- `npm run demo:mcp` requires `OPENAI_API_KEY` (uses a ReAct agent demo).
+- `npm run demo:mcp` requires `ANTHROPIC_API_KEY` (uses a ReAct agent demo).

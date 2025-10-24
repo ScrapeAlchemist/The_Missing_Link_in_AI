@@ -1,6 +1,6 @@
 /**
- * Setup Verification Script (ASCII-only output)
- * Checks Node version, environment, Bright Data API, Web Unlocker, and optional OpenAI.
+ * Setup Verification Script
+ * Checks Node version, environment variables, Bright Data API, and optional Anthropic
  */
 
 import 'dotenv/config';
@@ -13,7 +13,6 @@ console.log('============================================================');
 
 let allChecks = true;
 
-// 1) Node.js version
 console.log('\n1) Checking Node.js version...');
 const nodeVersion = process.version;
 const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
@@ -25,7 +24,6 @@ if (majorVersion >= 18) {
   allChecks = false;
 }
 
-// 2) Environment variables
 console.log('\n2) Checking environment variables...');
 for (const key of REQUIRED_ENV) {
   if (process.env[key]) {
@@ -38,10 +36,10 @@ for (const key of REQUIRED_ENV) {
 }
 
 console.log('\n   Optional variables:');
-if (process.env.OPENAI_API_KEY) {
-  console.log('   OK: OPENAI_API_KEY is set (enables LLM summaries)');
+if (process.env.ANTHROPIC_API_KEY) {
+  console.log('   OK: ANTHROPIC_API_KEY is set (enables LLM summaries)');
 } else {
-  console.log('   Note: OPENAI_API_KEY not set (heuristic summaries will be used)');
+  console.log('   Note: ANTHROPIC_API_KEY not set (heuristic summaries will be used)');
 }
 if (process.env.SERP_ZONE) {
   console.log('   OK: SERP_ZONE is set (enables SERP API demo)');
@@ -54,7 +52,6 @@ if (process.env.UNLOCKER_ZONE) {
   console.log('   Note: UNLOCKER_ZONE not set (demo:api fetch test will be skipped)');
 }
 
-// 3) Bright Data SERP API
 if (process.env.BRIGHTDATA_API_KEY && process.env.SERP_ZONE) {
   console.log('\n3) Testing Bright Data SERP API...');
   try {
@@ -96,7 +93,6 @@ if (process.env.BRIGHTDATA_API_KEY && process.env.SERP_ZONE) {
   console.log('\n3) Skipping SERP API test (credentials not configured)');
 }
 
-// 4) Bright Data Web Unlocker
 if (process.env.BRIGHTDATA_API_KEY && process.env.UNLOCKER_ZONE) {
   console.log('\n4) Testing Web Unlocker...');
   try {
@@ -133,31 +129,29 @@ if (process.env.BRIGHTDATA_API_KEY && process.env.UNLOCKER_ZONE) {
   console.log('\n4) Skipping Web Unlocker test (credentials not configured)');
 }
 
-// 5) Optional OpenAI
-if (process.env.OPENAI_API_KEY) {
-  console.log('\n5) Testing OpenAI API (optional)...');
+if (process.env.ANTHROPIC_API_KEY) {
+  console.log('\n5) Testing Anthropic API (optional)...');
   try {
-    const { default: OpenAI } = await import('openai');
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const response = await client.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    const { default: Anthropic } = await import('@anthropic-ai/sdk');
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const response = await client.messages.create({
+      model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5',
+      max_tokens: 10,
       messages: [{ role: 'user', content: 'Hi' }],
-      max_tokens: 5
     });
-    if (response.choices?.[0]?.message) {
-      console.log('   OK: OpenAI API connection successful');
-      console.log(`   OK: Using model: ${process.env.OPENAI_MODEL || 'gpt-4o-mini'}`);
+    if (response.content?.[0]?.text) {
+      console.log('   OK: Anthropic API connection successful');
+      console.log(`   OK: Using model: ${process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5'}`);
     }
   } catch (error) {
-    console.log(`   ERROR: OpenAI API error: ${error.message}`);
+    console.log(`   ERROR: Anthropic API error: ${error.message}`);
     console.log('   Note: This is optional; workshop works without it');
   }
 } else {
-  console.log('\n5) OpenAI not configured (optional)');
-  console.log('   Note: Summaries will use basic heuristic instead of LLM');
+  console.log('\n5) Anthropic not configured (optional)');
+  console.log('   Note: Summaries will use heuristic instead of LLM');
 }
 
-// Final summary
 console.log('\n============================================================');
 if (allChecks) {
   console.log('\nALL CHECKS PASSED. You are ready to go.\n');

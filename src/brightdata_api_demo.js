@@ -43,7 +43,7 @@ async function demoSearch(maxResults = 10) {
   results.forEach((r, i) => console.log(`  ${i + 1}. ${r.title}`));
   console.log();
 
-  // Collect up to maxResults URLs (prefer common URL fields)
+  // Collect up to maxResults URLs
   const urls = [];
   for (const r of results) {
     const u = r?.link || r?.url || r?.href;
@@ -53,7 +53,7 @@ async function demoSearch(maxResults = 10) {
   return urls;
 }
 
-// Example 2: Fetch multiple pages concurrently and save as HTML files
+// Example 2: Fetch multiple pages concurrently and save as HTML
 async function demoFetchAll(urls) {
   console.log('Example 2: Fetching page content (concurrent)...');
 

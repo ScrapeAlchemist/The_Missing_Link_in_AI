@@ -3,8 +3,8 @@
 ## Installation
 
 ```bash
-git clone https://github.com/brightdata/brightdata-workshop-calhack.git
-cd brightdata-workshop-calhack
+git clone https://github.com/ScrapeAlchemist/The_Missing_Link_in_AI.git
+cd The_Missing_Link_in_AI
 npm install
 ```
 
@@ -19,8 +19,8 @@ Go to [brightdata.com/cp/settings](https://brightdata.com/cp/settings)
 - Generate new token
 - Copy API key
 
-### 3. (Optional) Get OpenAI API Key
-Go to [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+### 3. (Optional) Get Anthropic API Key
+Go to [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys)
 - Create new API key
 - Copy key (optional; enables higher-quality synthesis)
 
@@ -33,7 +33,7 @@ Edit `.env`:
 ```bash
 BRIGHTDATA_API_KEY=your_api_key
 # Optional: enables LLM synthesis (heuristic fallback is used if omitted)
-OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
 ```
 
 **Note**: Zone configuration (SERP_ZONE, UNLOCKER_ZONE) is optional. The main workflow uses MCP and doesn't need zones. Zones are only required for the `demo:api` script to demonstrate direct HTTP API calls.
@@ -140,11 +140,11 @@ Modify the system prompt in [src/main_workflow.js:182](src/main_workflow.js#L182
 **Missing environment variables**
 - Check `.env` file exists
 - Verify BRIGHTDATA_API_KEY is set (required)
-- OPENAI_API_KEY is optional
+- ANTHROPIC_API_KEY is optional
 
 **Authentication failed**
 - Verify Bright Data API key at brightdata.com/cp/settings
-- Verify OpenAI API key at platform.openai.com/api-keys
+- Verify Anthropic API key at console.anthropic.com/settings/keys
 
 **Workflow takes too long**
 - Normal for comprehensive research (30-90s for 10 sources)
@@ -152,11 +152,11 @@ Modify the system prompt in [src/main_workflow.js:182](src/main_workflow.js#L182
 
 **Workflow output is brief**
 - Try a more specific query
-- Consider adding OPENAI_API_KEY for better synthesis
+- Consider adding ANTHROPIC_API_KEY for better synthesis
 
 ## Python Developers
 
-If you prefer working in Python, Bright Data offers a [Python SDK](https://github.com/luminati-io/bright-data-sdk-python) that provides high-level abstractions and type safety for production applications.
+If you prefer working in Python, Bright Data offers a [Python SDK](https://github.com/brightdata/bright-data-sdk-python) that provides high-level abstractions and type safety for production applications.
 
 ## Support
 
@@ -169,6 +169,6 @@ If you prefer working in Python, Bright Data offers a [Python SDK](https://githu
 
 ## No-LLM Offline Mode
 
-- You can run the main workflow without an OpenAI key. In that case, it uses a heuristic summarizer (headings, first sentences, keywords, citations).
-- For the best results, set `OPENAI_API_KEY` in `.env`.
-- The `demo:mcp` script uses OpenAI for the ReAct agent and requires the key to run.
+- You can run the main workflow without an Anthropic key. In that case, it uses a heuristic summarizer (headings, first sentences, keywords, citations).
+- For the best results, set `ANTHROPIC_API_KEY` in `.env`.
+- The `demo:mcp` script uses Claude (Anthropic) for the ReAct agent and requires the key to run.

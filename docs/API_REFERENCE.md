@@ -48,7 +48,7 @@ The workflow performs a straightforward pipeline:
 2. Select URLs with domain diversity
 3. Scrape with `scrape_as_markdown`
 4. Synthesize a comprehensive report with citations
-   - LLM (OpenAI) if configured
+   - LLM (Claude/Anthropic) if configured
    - Heuristic fallback if not
 
 The workflow has access to these Bright Data tools:
@@ -67,13 +67,13 @@ Required variables in `.env`:
 BRIGHTDATA_API_KEY=your_api_key_here
 
 # Optional (recommended for better synthesis)
-OPENAI_API_KEY=your_openai_key_here
-OPENAI_MODEL=gpt-4o-mini
+ANTHROPIC_API_KEY=your_anthropic_key_here
+ANTHROPIC_MODEL=claude-sonnet-4-5
 ```
 
 **Getting your keys:**
 - Bright Data API Key (required): https://brightdata.com/cp/settings
-- OpenAI API Key (optional): https://platform.openai.com/api-keys
+- Anthropic API Key (optional): https://console.anthropic.com/settings/keys
 
 ---
 
@@ -149,7 +149,7 @@ try {
 
 Common issues:
 - "Missing: BRIGHTDATA_API_KEY" ? Check `.env` file
-- "Missing: OPENAI_API_KEY" ? LLM not configured; the workflow will use the heuristic fallback
+- "Missing: ANTHROPIC_API_KEY" ? LLM not configured; the workflow will use the heuristic fallback
 - Authentication errors ? Verify keys are valid (for demos/LLM)
 
 ---
@@ -159,9 +159,9 @@ Common issues:
 **Execution Time**: The workflow analyzes up to 10 sources. Typical execution: 30-90 seconds depending on query complexity and sources selected.
 
 **Cost Optimization**:
-- Uses gpt-4o-mini by default (cost-effective model)
+- Uses claude-sonnet-4-5 by default (latest and most capable model)
 - Bright Data charges based on data transferred
-- Set OPENAI_MODEL=gpt-4o for higher quality at higher cost
+- Set ANTHROPIC_MODEL to different Claude models for cost/quality tradeoffs
 
 **Quality vs Speed**:
 - More sources (`maxResults: 10`) = more comprehensive but slower
@@ -179,6 +179,6 @@ Common issues:
 
 ## Notes
 
-- Main workflow: MCP search + scrape, then synthesis. Uses OpenAI if configured; otherwise falls back to heuristic summarization with citations.
-- ReAct agent demo: The `demo:mcp` script demonstrates a ReAct-style agent and requires `OPENAI_API_KEY`.
-- Environment: Only `BRIGHTDATA_API_KEY` is required to run the main workflow. `OPENAI_API_KEY` is optional (improves synthesis quality). `SERP_ZONE` and `UNLOCKER_ZONE` are only needed for the demo scripts.
+- Main workflow: MCP search + scrape, then synthesis. Uses Claude (Anthropic) if configured; otherwise falls back to heuristic summarization with citations.
+- ReAct agent demo: The `demo:mcp` script demonstrates a ReAct-style agent and requires `ANTHROPIC_API_KEY`.
+- Environment: Only `BRIGHTDATA_API_KEY` is required to run the main workflow. `ANTHROPIC_API_KEY` is optional (improves synthesis quality). `SERP_ZONE` and `UNLOCKER_ZONE` are only needed for the demo scripts.

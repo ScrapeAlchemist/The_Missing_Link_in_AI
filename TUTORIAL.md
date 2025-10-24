@@ -13,8 +13,8 @@ This tutorial is designed for independent learning. Follow the steps in order fo
 
 ### Step 1.1: Clone & Install
 ```bash
-git clone https://github.com/brightdata/brightdata-workshop-calhack.git
-cd brightdata-workshop-calhack
+git clone https://github.com/ScrapeAlchemist/The_Missing_Link_in_AI.git
+cd The_Missing_Link_in_AI
 npm install
 ```
 
@@ -25,7 +25,7 @@ npm install
 1. **Sign up** at [brightdata.com](https://brightdata.com) (free tier available)
 2. **Get Bright Data API key** at [brightdata.com/cp/settings](https://brightdata.com/cp/settings):
    - Navigate to "API tokens" → Generate new token → Copy it
-3. **Get OpenAI API key** at [platform.openai.com/api-keys](https://platform.openai.com/api-keys):
+3. **Get Anthropic API key** at [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys):
    - Optional but recommended for higher-quality synthesis (heuristic fallback used if omitted)
 
 ### Step 1.3: Configure Environment
@@ -36,7 +36,7 @@ cp .env.example .env
 Edit `.env` with your credentials:
 ```bash
 BRIGHTDATA_API_KEY=your_api_key_here
-OPENAI_API_KEY=sk-...  # Optional but recommended
+ANTHROPIC_API_KEY=sk-ant-...  # Optional but recommended
 ```
 
 Zones for API demo (optional): If you want to run the direct API demo (`npm run demo:api`) or validate all checks in `npm run verify`, also add your zone names:
@@ -66,7 +66,7 @@ npm start "your topic here"
 
 **Troubleshooting**:
 - "Missing: BRIGHTDATA_API_KEY" → Check your `.env` file
-- "OPENAI_API_KEY not set" → This is OK! The workflow will use heuristic summarization
+- "ANTHROPIC_API_KEY not set" → This is OK! The workflow will use heuristic summarization
 - "Authentication failed" → Verify BRIGHTDATA_API_KEY is correct
 
 ✅ **Checkpoint**: You've successfully run an intelligent MCP-powered research agent!
@@ -83,7 +83,7 @@ npm start "your topic here"
 
 **Key components**:
 1. **MultiServerMCPClient**: Connects to Bright Data MCP server
-2. **ChatOpenAI** (optional): LLM for higher-quality synthesis if `OPENAI_API_KEY` is set
+2. **ChatAnthropic** (optional): LLM for higher-quality synthesis if `ANTHROPIC_API_KEY` is set
 3. **Heuristic fallback**: Offline summarizer (headings, first sentences, keywords) when no LLM is configured
 
 **The workflow autonomously**:
@@ -123,13 +123,13 @@ Shows raw HTTP requests. Requires `SERP_ZONE` and `UNLOCKER_ZONE` in your `.env`
 ```bash
 npm run demo:mcp
 ```
-Basic MCP integration with ReAct agent. Requires `OPENAI_API_KEY`.
+Basic MCP integration with ReAct agent. Requires `ANTHROPIC_API_KEY`.
 
 ---
 
 ### Note on Python SDK
 
-If you prefer working in Python, Bright Data offers a [Python SDK](https://github.com/luminati-io/bright-data-sdk-python) that provides high-level abstractions and type safety for production applications.
+If you prefer working in Python, Bright Data offers a [Python SDK](https://github.com/brightdata/bright-data-sdk-python) that provides high-level abstractions and type safety for production applications.
 
 ✅ **Checkpoint**: You understand how the intelligent MCP agent works and have seen it analyze multiple sources!
 
@@ -345,8 +345,8 @@ Built something cool? We'd love to see it!
 **Problem**: Output is too brief
 **Solution**: The workflow may need a more specific query. Try being more detailed in your search.
 
-**Problem**: "Missing: OPENAI_API_KEY"
-**Solution**: The workflow will run with heuristic summarization when OpenAI is not configured. For higher-quality output, add your key to `.env`.
+**Problem**: "Missing: ANTHROPIC_API_KEY"
+**Solution**: The workflow will run with heuristic summarization when Claude is not configured. For higher-quality output, add your key to `.env`.
 
 **Problem**: "Authentication failed"
 **Solution**: Verify BRIGHTDATA_API_KEY is correct in `.env`
@@ -364,10 +364,10 @@ Built something cool? We'd love to see it!
 
 ## Appendix: No-LLM Offline Mode
 
-- Don't have an OpenAI key? You can still complete the workshop.
-- The main workflow (`npm start`) will run heuristic summarization when `OPENAI_API_KEY` is not set:
+- Don't have an Anthropic key? You can still complete the workshop.
+- The main workflow (`npm start`) will run heuristic summarization when `ANTHROPIC_API_KEY` is not set:
   - Uses headings and first sentences from scraped pages
   - Highlights common keywords
   - Always includes source URLs (citations)
 - Quality will be lower than using an LLM, but it's reliable and sufficient for learning the MCP flow.
-- The `demo:mcp` script requires OpenAI for the ReAct agent demo.
+- The `demo:mcp` script requires Claude (Anthropic) for the ReAct agent demo.

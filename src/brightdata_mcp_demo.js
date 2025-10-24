@@ -5,7 +5,7 @@
  */
 
 import 'dotenv/config';
-import { ChatOpenAI } from '@langchain/openai';
+import { ChatAnthropic } from '@langchain/anthropic';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { MultiServerMCPClient } from '@langchain/mcp-adapters';
 import { fileURLToPath } from 'url';
@@ -18,9 +18,9 @@ const CONTENT_LIMITS = {
 
 async function runMcpStyleDemo(query = 'AI news 2025') {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.log('OPENAI_API_KEY not set. This demo requires an LLM.');
-      console.log('Tip: You can still run the main workflow (npm start) which falls back to a heuristic summary without an LLM.');
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.log('ANTHROPIC_API_KEY not set. This demo requires an LLM.');
+      console.log('Run the main workflow (npm start) for heuristic fallback without an LLM.');
       return;
     }
     console.log(`\n${'='.repeat(60)}`);
@@ -42,14 +42,12 @@ async function runMcpStyleDemo(query = 'AI news 2025') {
     const allTools = await client.getTools();
     console.log(`Retrieved ${allTools.length} tools from Bright Data MCP`);
 
-    // Note: All 61 tools = only ~3,300 tokens for function definitions in isolation
-    // However, createReactAgent expands this to 575K+ tokens on first request
-    // This exceeds rate limits for standard OpenAI accounts (450K TPM for gpt-4o)
-    // For workshop demos, we filter to commonly used tools to keep it accessible
+    // Filter to commonly used tools for demo simplicity
+    // All 61 tools use ~3.3K tokens per request, 2 tools use ~183 tokens
     const COMMON_TOOLS = ['search_engine', 'scrape_as_markdown'];
     const tools = allTools.filter(t => COMMON_TOOLS.includes(t.name));
 
-    // Wrap scrape_as_markdown to limit content length (like main workflow)
+    // Wrap scrape_as_markdown to limit content length
     const toolUsageStats = { search_engine: 0, scrape_as_markdown: 0 };
 
     const wrappedTools = tools.map(t => {
@@ -60,12 +58,11 @@ async function runMcpStyleDemo(query = 'AI news 2025') {
           invoke: async (input) => {
             toolUsageStats.scrape_as_markdown++;
 
-            // Handle different input formats
+            // Extract URL from different input formats
             let url = 'unknown';
             if (typeof input === 'string') {
               url = input;
             } else if (input && typeof input === 'object') {
-              // Debug: log the actual input structure
               const keys = Object.keys(input);
               if (keys.length > 0) {
                 url = input.url || input[keys[0]] || JSON.stringify(input).substring(0, 100);
@@ -87,7 +84,7 @@ async function runMcpStyleDemo(query = 'AI news 2025') {
           invoke: async (input) => {
             toolUsageStats.search_engine++;
 
-            // Handle different input formats
+            // Extract query and engine from different input formats
             let query = 'unknown';
             let engine = 'google';
             if (typeof input === 'string') {
@@ -117,12 +114,12 @@ async function runMcpStyleDemo(query = 'AI news 2025') {
     console.log('STEP 3: Configuring LLM');
     console.log('='.repeat(60));
 
-    const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+    const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5';
     console.log(`Model: ${model}`);
     console.log(`Temperature: 0 (deterministic)`);
 
-    const llm = new ChatOpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+    const llm = new ChatAnthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
       model,
       temperature: 0,
     });
@@ -131,15 +128,14 @@ async function runMcpStyleDemo(query = 'AI news 2025') {
     console.log('STEP 4: Creating ReAct Agent');
     console.log('='.repeat(60));
 
-    console.log('ReAct = Reasoning + Acting pattern');
-    console.log('Agent will autonomously plan and execute tool calls');
+    console.log('Agent uses Reasoning + Acting pattern to autonomously plan and execute tool calls');
 
     const systemPrompt = `
 You are a web research agent with access to Bright Data's tools:
-- search_engine: Search Google/Bing/Yandex for relevant content
-- scrape_as_markdown: Extract clean content from any webpage
+- search_engine: Search Google/Bing/Yandex
+- scrape_as_markdown: Extract page content as markdown
 
-Process the user's query step by step:
+Process queries step by step:
 1. Search for relevant information
 2. Scrape the most relevant pages (up to ${Math.floor(CONTENT_LIMITS.SCRAPE_PREVIEW / 1000)}k chars each)
 3. Synthesize the information into a clear answer
@@ -157,8 +153,7 @@ Process the user's query step by step:
     console.log('STEP 5: Executing Agent Query');
     console.log('='.repeat(60));
 
-    console.log(`Query: "${query}"`);
-    console.log('Agent will autonomously decide which tools to use and when\n');
+    console.log(`Query: "${query}"\n`);
 
     const startTime = Date.now();
     const result = await agent.invoke({
@@ -185,7 +180,6 @@ Process the user's query step by step:
     console.log(`     - scrape_as_markdown: ${toolUsageStats.scrape_as_markdown}x`);
     console.log('\n');
 
-    // Close MCP client
     try {
       await client.close();
       console.log('MCP client closed');
